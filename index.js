@@ -11,25 +11,17 @@ const yourPassword = "grizzle";
 const yourAPIKey = "183bb517-1b57-4738-9fd5-9eafe8c66cf1";
 const yourBearerToken = "4740edab-5bcc-411e-96e9-167c08ea0d09";
 
-const config = {
-  headers: { Authenticator: `Bearer ${yourBearerToken}` },
-};
-
 app.get("/", (req, res) => {
   res.render("index.ejs", { content: "API Response." });
 });
 
 app.get("/noAuth", async (req, res) => {
   try {
-    const response = await axios.get(`${API_URL}` + "/random");
-    const result = response.data;
+    const result = await axios.get(API_URL + "/random");
     res.render("index.ejs", { content: JSON.stringify(result.data) });
   } catch (error) {
     res.status(404).send(error.message);
   }
-  //TODO 2: Use axios to hit up the /random endpoint
-  //The data you get back should be sent to the ejs file as "content"
-  //Hint: make sure you use JSON.stringify to turn the JS object from axios into a string.
 });
 
 app.get("/basicAuth", async (req, res) => {
@@ -46,13 +38,12 @@ app.get("/basicAuth", async (req, res) => {
     });
   */
   try {
-    const response = await axios.get(`${API_URL}` + "/all?page=1", {
+    const result = await axios.get(API_URL + "/all?page=2", {
       auth: {
         username: yourUsername,
         password: yourPassword,
       },
     });
-    const result = response.data;
     res.render("index.ejs", { content: JSON.stringify(result.data) });
   } catch (error) {
     res.status(404).send(error.message);
@@ -64,7 +55,7 @@ app.get("/apiKey", async (req, res) => {
   //Filter for all secrets with an embarassment score of 5 or greater
   //HINT: You need to provide a query parameter of apiKey in the request.
   try {
-    const result = await axios.get(`${API_URL}` + "/filter" + yourAPIKey, {
+    const result = await axios.get(API_URL + "/filter", {
       params: {
         score: 5,
         apiKey: yourAPIKey,
@@ -72,9 +63,13 @@ app.get("/apiKey", async (req, res) => {
     });
     res.render("index.ejs", { content: JSON.stringify(result.data) });
   } catch (error) {
-    res.statusCode(404).send(error.message);
+    res.status(404).send(error.message);
   }
 });
+
+const config = {
+  headers: { Authorization: `Bearer ${yourBearerToken}` },
+};
 
 app.get("/bearerToken", async (req, res) => {
   //TODO 5: Write your code here to hit up the /secrets/{id} endpoint
@@ -89,9 +84,11 @@ app.get("/bearerToken", async (req, res) => {
   });
   */
   try {
-    const response = await axios.get(API_URL + "/secrets/2", config);
+    const result = await axios.get(API_URL + "/secrets/2", config);
     res.render("index.ejs", { content: JSON.stringify(result.data) });
-  } catch (error) {}
+  } catch (error) {
+    res.status(404).send(error.message);
+  }
 });
 
 app.listen(port, () => {
